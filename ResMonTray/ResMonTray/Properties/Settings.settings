@@ -1,0 +1,75 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ResMonTray.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="ShowResIcon" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="ShowCpuIcon" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="RefreshInterval" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="PlotItems" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">100</Value>
+    </Setting>
+    <Setting Name="PlotWidth" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">250</Value>
+    </Setting>
+    <Setting Name="PlotHeight" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">100</Value>
+    </Setting>
+    <Setting Name="PlotGridColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">DarkSlateGray</Value>
+    </Setting>
+    <Setting Name="SwapColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">Yellow</Value>
+    </Setting>
+    <Setting Name="RamColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">Cyan</Value>
+    </Setting>
+    <Setting Name="CpuTotalColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">Lime</Value>
+    </Setting>
+    <Setting Name="CpuMaxColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">Red</Value>
+    </Setting>
+    <Setting Name="Cpu1Color" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">LightGreen</Value>
+    </Setting>
+    <Setting Name="Cpu2Color" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">255, 246, 42</Value>
+    </Setting>
+    <Setting Name="Cpu3Color" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">250, 186, 0</Value>
+    </Setting>
+    <Setting Name="Cpu4Color" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">236, 117, 39</Value>
+    </Setting>
+    <Setting Name="Cpu5Color" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">226, 0, 59</Value>
+    </Setting>
+    <Setting Name="Cpu6Color" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">229, 49, 108</Value>
+    </Setting>
+    <Setting Name="Cpu7Color" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">215, 0, 122</Value>
+    </Setting>
+    <Setting Name="Cpu8Color" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">174, 50, 136</Value>
+    </Setting>
+    <Setting Name="IconBackgroundColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">Green</Value>
+    </Setting>
+    <Setting Name="IconSize" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">16</Value>
+    </Setting>
+    <Setting Name="PlotRectColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">LightSlateGray</Value>
+    </Setting>
+    <Setting Name="PlotMarkerColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">240, 240, 240</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
