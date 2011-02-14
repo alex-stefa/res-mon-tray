@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Diagnostics;
-using System.Management;
 using System.Windows.Forms;
 
 namespace ResMonTray
@@ -87,8 +83,8 @@ namespace ResMonTray
             if (showResTray) resIcon = graphicsProvider.GetResTrayIcon(dataProvider, history);
             if (showCpuTray) cpuIcon = graphicsProvider.GetCpuTrayIcon(dataProvider, history);
 
-            if (resTrayMenu.Visible) resGraphItem.SetImage(graphicsProvider.GetResGraph(dataProvider, history));
-            if (cpuTrayMenu.Visible) cpuGraphItem.SetImage(graphicsProvider.GetCpuGraph(dataProvider, history));
+            if (resTrayMenu.Visible) resGraphItem.DisplayImage = graphicsProvider.GetResGraph(dataProvider, history);
+            if (cpuTrayMenu.Visible) cpuGraphItem.DisplayImage = graphicsProvider.GetCpuGraph(dataProvider, history);
 
             long now = DateTime.Now.Ticks;
 
@@ -426,6 +422,8 @@ namespace ResMonTray
                 "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
+        #region event handlers
+
         private void cpuQuitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             InitializeShutdown();
@@ -561,13 +559,13 @@ namespace ResMonTray
         private void resTrayMenu_Opening(object sender, CancelEventArgs e)
         {
             UpdateLabels(true, false);
-            resGraphItem.SetImage(graphicsProvider.GetResGraph(dataProvider, history));
+            resGraphItem.DisplayImage = graphicsProvider.GetResGraph(dataProvider, history);
         }
 
         private void cpuTrayMenu_Opening(object sender, CancelEventArgs e)
         {
             UpdateLabels(false, true);
-            cpuGraphItem.SetImage(graphicsProvider.GetCpuGraph(dataProvider, history));
+            cpuGraphItem.DisplayImage = graphicsProvider.GetCpuGraph(dataProvider, history);
         }
 
         private void resTrayIcon_MouseClick(object sender, MouseEventArgs e)
@@ -593,6 +591,8 @@ namespace ResMonTray
             e.Cancel = keepCpuMenuOpen;
             keepCpuMenuOpen = false;
         }
+
+        #endregion
 
         protected override void Dispose(bool disposing)
         {
@@ -1041,6 +1041,8 @@ namespace ResMonTray
 
         #endregion
 
+        #region components definitions
+
         private System.Windows.Forms.NotifyIcon resTrayIcon;
         private System.Windows.Forms.NotifyIcon cpuTrayIcon;
         private System.Windows.Forms.ContextMenuStrip resTrayMenu;
@@ -1085,8 +1087,11 @@ namespace ResMonTray
         private System.Windows.Forms.ToolStripMenuItem cpu30SecToolStripMenuItem4;
         private System.Windows.Forms.ToolStripTextBox resOtherSecToolStripMenuItem;
         private System.Windows.Forms.ToolStripTextBox cpuOtherSecToolStripMenuItem;
+
+        #endregion
     }
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     class PerformanceDataProvider
     {
@@ -1143,6 +1148,8 @@ namespace ResMonTray
         }
     }
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     class PerformanceDataItem
     {
         public int availableRam;    // MBytes
@@ -1167,6 +1174,8 @@ namespace ResMonTray
             return index;
         }
     }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     class GraphicsProvider
     {
@@ -1465,28 +1474,33 @@ namespace ResMonTray
         }
     }
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     class ImageToolStripMenuItem : ToolStripMenuItem
     {
-        private Bitmap image;
+        public Bitmap DisplayImage { get; set; }
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            if (image != null)
-                e.Graphics.DrawImage(image, 0, 0);
+            if (DisplayImage != null)
+                e.Graphics.DrawImage(DisplayImage, 0, 0);
             else
                 e.Graphics.FillRectangle(Brushes.Transparent, 0, 0, this.Width, this.Height);
         }
-
-        public void SetImage(Bitmap image)
-        {
-            this.image = image;
-        }
     }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     class ProgressToolStripMenuItem : ToolStripMenuItem
     {
-        private Color color;
-        private float status;
+        public Color ProgressBarColor { get; set; }
+        private float ProgressStatus { get; set; }
+
+        public ProgressToolStripMenuItem(string text, Color color) : base(text)
+        {
+            this.ProgressBarColor = color;
+            this.ProgressStatus = 0;
+        }
 
         protected override void OnPaint(PaintEventArgs e)
         {
