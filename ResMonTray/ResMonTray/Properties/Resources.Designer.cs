@@ -67,6 +67,13 @@ namespace ResMonTray.Properties {
             }
         }
         
+        internal static System.Drawing.Icon icon {
+            get {
+                object obj = ResourceManager.GetObject("icon", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap Info {
             get {
                 object obj = ResourceManager.GetObject("Info", resourceCulture);
