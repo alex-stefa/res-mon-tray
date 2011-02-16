@@ -24,7 +24,8 @@ namespace ResMonTray
         private GraphicsProvider graphicsProvider;
         private BackgroundWorker worker;
         private ImageToolStripMenuItem resGraphItem, cpuGraphItem;
-        private List<ToolStripMenuItem> coresMenuItems;
+        private ProgressToolStripMenuItem physicalMemoryItem, pageFileItem, cpuTotalItem, cpuMaxItem;
+        private List<ProgressToolStripMenuItem> coresMenuItems;
         private Icon resIcon, cpuIcon;
 
         public MainApp()
@@ -97,71 +98,86 @@ namespace ResMonTray
 
         private void InitializeMenus()
         {
+            int defaultMenuHeight = 22;
+
             resTrayIcon.BalloonTipTitle = "RAM & CPU Monitor";
             cpuTrayIcon.BalloonTipTitle = "CPU Cores Monitor";
+
             resTrayIcon.BalloonTipIcon = ToolTipIcon.Info;
             cpuTrayIcon.BalloonTipIcon = ToolTipIcon.Info;
 
             resGraphItem = new ImageToolStripMenuItem();
             cpuGraphItem = new ImageToolStripMenuItem();
-            resTrayMenu.Items.Insert(2, resGraphItem);
-            cpuTrayMenu.Items.Insert(2, cpuGraphItem);
 
-            if (dataProvider.coreCount == 1) cpuMaxToolStripMenuItem.Visible = false;
+            resGraphItem.AutoSize = false;
+            cpuGraphItem.AutoSize = false;
 
-            physicalMemoryToolStripMenuItem.Image = GraphicsProvider.GetSolidColorImage(Properties.Settings.Default.RamColor);
-            pageFileToolStripMenuItem.Image = GraphicsProvider.GetSolidColorImage(Properties.Settings.Default.SwapColor);
-            cpuTotalToolStripMenuItem.Image = GraphicsProvider.GetSolidColorImage(Properties.Settings.Default.CpuTotalColor);
-            cpuMaxToolStripMenuItem.Image = GraphicsProvider.GetSolidColorImage(Properties.Settings.Default.CpuMaxColor);
+            resGraphItem.Height = Properties.Settings.Default.PlotHeight;
+            cpuGraphItem.Height = Properties.Settings.Default.PlotHeight;
 
             resGraphItem.MouseDown += PreventResMenuClosingOnClickHandler;
             cpuGraphItem.MouseDown += PreventCpuMenuClosingOnClickHandler;
 
-            physicalMemoryToolStripMenuItem.MouseDown += PreventResMenuClosingOnClickHandler;
-            pageFileToolStripMenuItem.MouseDown += PreventResMenuClosingOnClickHandler;
-            cpuTotalToolStripMenuItem.MouseDown += PreventResMenuClosingOnClickHandler;
-            cpuMaxToolStripMenuItem.MouseDown += PreventResMenuClosingOnClickHandler;
+            resTrayMenu.Items.Insert(2, resGraphItem);
+            cpuTrayMenu.Items.Insert(2, cpuGraphItem);
 
-            coresMenuItems = new List<ToolStripMenuItem>(plottedCores);
+            physicalMemoryItem = new ProgressToolStripMenuItem(Properties.Settings.Default.RamColor, "Physical Memory: ");
+            pageFileItem = new ProgressToolStripMenuItem(Properties.Settings.Default.SwapColor, "Page File: ");
+            cpuTotalItem = new ProgressToolStripMenuItem(Properties.Settings.Default.CpuTotalColor, "CPU Total Load: ");
+            cpuMaxItem = new ProgressToolStripMenuItem(Properties.Settings.Default.CpuMaxColor, "CPU Max Load: ");
+
+            physicalMemoryItem.AutoSize = false;
+            pageFileItem.AutoSize = false;
+            cpuTotalItem.AutoSize = false;
+            cpuMaxItem.AutoSize = false;
+
+            physicalMemoryItem.Height = defaultMenuHeight;
+            pageFileItem.Height = defaultMenuHeight;
+            cpuTotalItem.Height = defaultMenuHeight;
+            cpuMaxItem.Height = defaultMenuHeight;
+
+            physicalMemoryItem.MouseDown += PreventResMenuClosingOnClickHandler;
+            pageFileItem.MouseDown += PreventResMenuClosingOnClickHandler;
+            cpuTotalItem.MouseDown += PreventResMenuClosingOnClickHandler;
+            cpuMaxItem.MouseDown += PreventResMenuClosingOnClickHandler;
+
+            resTrayMenu.Items.Insert(4, physicalMemoryItem);
+            resTrayMenu.Items.Insert(5, pageFileItem);
+            resTrayMenu.Items.Insert(6, cpuTotalItem);
+            resTrayMenu.Items.Insert(7, cpuMaxItem);
+
+            if (dataProvider.coreCount == 1) cpuMaxItem.Visible = false;
+
+            coresMenuItems = new List<ProgressToolStripMenuItem>(plottedCores);
             for (int i = 0; i < plottedCores; i++)
             {
-                //ToolStripMenuItem menuItem = new ToolStripMenuItem("CPU " + (i + 1));
-                ToolStripMenuItem menuItem = new ProgressToolStripMenuItem();
+                Color color = (Color)Properties.Settings.Default["Cpu" + (i + 1) + "Color"];
+                ProgressToolStripMenuItem menuItem = new ProgressToolStripMenuItem(color, "CPU " + (i + 1));
+                menuItem.AutoSize = false;
                 menuItem.MouseDown += PreventCpuMenuClosingOnClickHandler;
-                menuItem.Image = GraphicsProvider.GetSolidColorImage((Color)Properties.Settings.Default["Cpu" + (i + 1) + "Color"]);
-                menuItem.Height = 22;
+                menuItem.Height = defaultMenuHeight;
                 cpuTrayMenu.Items.Insert(4 + i, menuItem);
                 coresMenuItems.Add(menuItem);
             }
 
-            resGraphItem.AutoSize = false;
-            resGraphItem.Height = Properties.Settings.Default.PlotHeight;
-            resGraphItem.Width = Properties.Settings.Default.PlotWidth;
             resTrayMenu.AutoSize = false;
             int resHeight = 4;
             foreach (ToolStripItem item in resTrayMenu.Items)
             {
                 item.AutoSize = false;
                 item.Width = Properties.Settings.Default.PlotWidth;
-                //item.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-                //item.Dock = DockStyle.Fill;
                 resHeight += item.Height;
             }
             resTrayMenu.Width = Properties.Settings.Default.PlotWidth;
-            if (dataProvider.coreCount == 1) resHeight -= cpuMaxToolStripMenuItem.Height;
+            if (dataProvider.coreCount == 1) resHeight -= cpuMaxItem.Height;
             resTrayMenu.Height = resHeight;
 
-            cpuGraphItem.AutoSize = false;
-            cpuGraphItem.Height = Properties.Settings.Default.PlotHeight;
-            cpuGraphItem.Width = Properties.Settings.Default.PlotWidth;
             cpuTrayMenu.AutoSize = false;
             int cpuHeight = 4;
             foreach (ToolStripItem item in cpuTrayMenu.Items)
             {
                 item.AutoSize = false;
                 item.Width = Properties.Settings.Default.PlotWidth;
-                //item.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-                //item.Dock = DockStyle.Fill;
                 cpuHeight += item.Height;
             }
             cpuTrayMenu.Width = Properties.Settings.Default.PlotWidth;
@@ -176,12 +192,17 @@ namespace ResMonTray
 
             if (resTrayMenu.Visible || forceResUpdate)
             {
-                physicalMemoryToolStripMenuItem.Text = "RAM free: " + data.availableRam + "/" + dataProvider.ramSize + "MB (" +
+                physicalMemoryItem.Text = "RAM free: " + data.availableRam + "/" + dataProvider.ramSize + "MB (" +
                     (int)(data.availableRam * 100.0f / dataProvider.ramSize) + "%)";
-                pageFileToolStripMenuItem.Text = "Swap free: " + (data.totalPageFile - data.usedPageFile) + "/" + data.totalPageFile + "MB (" +
+                pageFileItem.Text = "Swap free: " + (data.totalPageFile - data.usedPageFile) + "/" + data.totalPageFile + "MB (" +
                     (int)((data.totalPageFile - data.usedPageFile) * 100.0f / data.totalPageFile) + "%)";
-                cpuTotalToolStripMenuItem.Text = "CPU Total Load: " + data.cpuTotal + "% @ " + dataProvider.cpuFrequency + "MHz";
-                cpuMaxToolStripMenuItem.Text = "CPU Max Load: " + data.cores[data.GetMaxIndex()] + "% Core #" + (data.GetMaxIndex() + 1) + " of " + dataProvider.coreCount;
+                cpuTotalItem.Text = "CPU Total Load: " + data.cpuTotal + "% @ " + dataProvider.cpuFrequency + "MHz";
+                cpuMaxItem.Text = "CPU Max Load: " + data.cores[data.GetMaxIndex()] + "% Core #" + (data.GetMaxIndex() + 1) + " of " + dataProvider.coreCount;
+
+                physicalMemoryItem.ProgressStatus = (float)(dataProvider.ramSize - data.availableRam) / dataProvider.ramSize;
+                pageFileItem.ProgressStatus = (float) data.usedPageFile / data.totalPageFile;
+                cpuTotalItem.ProgressStatus = data.cpuTotal / 100.0f;
+                cpuMaxItem.ProgressStatus = data.cores[data.GetMaxIndex()] / 100.0f;
             }
 
             resTrayIcon.BalloonTipText = "\nCPU Total " + data.cpuTotal + "%\nRAM free: " + data.availableRam + "MB / " + dataProvider.ramSize + "MB\nSwap free: " +
@@ -192,7 +213,10 @@ namespace ResMonTray
             if (cpuTrayMenu.Visible || forceCpuUpdate)
             {
                 for (int i = 0; i < plottedCores; i++)
+                {
                     coresMenuItems[i].Text = "CPU Core #" + (i + 1) + " Load: " + data.cores[i] + "%";
+                    coresMenuItems[i].ProgressStatus = data.cores[i] / 100.0f;
+                }
             }
 
             string text = "\n@ " + dataProvider.cpuFrequency + "MHz";
@@ -212,11 +236,13 @@ namespace ResMonTray
         {
             if (showResTray && resIcon != null)
             {
+                DestroyIcon(resTrayIcon.Icon.Handle);
                 resTrayIcon.Icon = resIcon;
                 DestroyIcon(resIcon.Handle);
             }
             if (showCpuTray && cpuIcon != null)
             {
+                DestroyIcon(cpuTrayIcon.Icon.Handle);
                 cpuTrayIcon.Icon = cpuIcon;
                 DestroyIcon(cpuIcon.Handle);
             }
@@ -615,10 +641,6 @@ namespace ResMonTray
             this.resTitleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resSep1 = new System.Windows.Forms.ToolStripSeparator();
             this.resSep2 = new System.Windows.Forms.ToolStripSeparator();
-            this.physicalMemoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pageFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.cpuTotalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.cpuMaxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resSep3 = new System.Windows.Forms.ToolStripSeparator();
             this.resShowIconsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resShowResToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -670,10 +692,6 @@ namespace ResMonTray
             this.resTitleToolStripMenuItem,
             this.resSep1,
             this.resSep2,
-            this.physicalMemoryToolStripMenuItem,
-            this.pageFileToolStripMenuItem,
-            this.cpuTotalToolStripMenuItem,
-            this.cpuMaxToolStripMenuItem,
             this.resSep3,
             this.resShowIconsToolStripMenuItem,
             this.resRefreshToolStripMenuItem,
@@ -701,30 +719,6 @@ namespace ResMonTray
             // 
             this.resSep2.Name = "resSep2";
             this.resSep2.Size = new System.Drawing.Size(182, 6);
-            // 
-            // physicalMemoryToolStripMenuItem
-            // 
-            this.physicalMemoryToolStripMenuItem.Name = "physicalMemoryToolStripMenuItem";
-            this.physicalMemoryToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
-            this.physicalMemoryToolStripMenuItem.Text = "Physical Memory:";
-            // 
-            // pageFileToolStripMenuItem
-            // 
-            this.pageFileToolStripMenuItem.Name = "pageFileToolStripMenuItem";
-            this.pageFileToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
-            this.pageFileToolStripMenuItem.Text = "Page File:";
-            // 
-            // cpuTotalToolStripMenuItem
-            // 
-            this.cpuTotalToolStripMenuItem.Name = "cpuTotalToolStripMenuItem";
-            this.cpuTotalToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
-            this.cpuTotalToolStripMenuItem.Text = "CPU Total:";
-            // 
-            // cpuMaxToolStripMenuItem
-            // 
-            this.cpuMaxToolStripMenuItem.Name = "cpuMaxToolStripMenuItem";
-            this.cpuMaxToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
-            this.cpuMaxToolStripMenuItem.Text = "CPU Max:";
             // 
             // resSep3
             // 
@@ -1040,7 +1034,7 @@ namespace ResMonTray
         }
 
         #endregion
-
+                
         #region components definitions
 
         private System.Windows.Forms.NotifyIcon resTrayIcon;
@@ -1048,10 +1042,6 @@ namespace ResMonTray
         private System.Windows.Forms.ContextMenuStrip resTrayMenu;
         private System.Windows.Forms.ToolStripMenuItem resTitleToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator cpuSep1;
-        private System.Windows.Forms.ToolStripMenuItem physicalMemoryToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem pageFileToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem cpuTotalToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem cpuMaxToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator cpuSep3;
         private System.Windows.Forms.ToolStripMenuItem cpuShowIconsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cpuShowResToolStripMenuItem;
@@ -1179,7 +1169,6 @@ namespace ResMonTray
 
     class GraphicsProvider
     {
-        private static int menuIconSize = 32;
         private static int trayIconSize = Properties.Settings.Default.IconSize;
         private static int graphWidth = Properties.Settings.Default.PlotWidth;
         private static int graphHeight = Properties.Settings.Default.PlotHeight;
@@ -1236,12 +1225,12 @@ namespace ResMonTray
             markerFont = new Font("Arial", 5);
         }
 
-        public static Image GetSolidColorImage(Color color)
+        public static Image GetSolidColorImage(Color color, int size = 16)
         {
-            Bitmap image = new Bitmap(menuIconSize, menuIconSize);
+            Bitmap image = new Bitmap(size, size);
             Graphics graphics = Graphics.FromImage(image);
             Brush brush = new SolidBrush(color);
-            graphics.FillRectangle(brush, 0, 0, menuIconSize, menuIconSize);
+            graphics.FillRectangle(brush, 0, 0, size, size);
             graphics.Flush();
             brush.Dispose();
             graphics.Dispose();
@@ -1493,20 +1482,55 @@ namespace ResMonTray
 
     class ProgressToolStripMenuItem : ToolStripMenuItem
     {
-        public Color ProgressBarColor { get; set; }
-        private float ProgressStatus { get; set; }
+        public Color ProgressBarColor { get{ return progressBarColor; } }
+        public float ProgressStatus { get; set; }
 
-        public ProgressToolStripMenuItem(string text, Color color) : base(text)
+        private Brush progressBrush;
+        private Color progressBarColor;
+
+        private void Initialize()
         {
-            this.ProgressBarColor = color;
             this.ProgressStatus = 0;
+            this.progressBrush = new SolidBrush(this.progressBarColor);
+            this.Image = GraphicsProvider.GetSolidColorImage(this.progressBarColor);
+        }
+
+        public ProgressToolStripMenuItem(Color color, string text = null) : base(text)
+        {
+            this.progressBarColor = color;
+            Initialize();
+        }
+
+        public ProgressToolStripMenuItem(string text) : base(text)
+        {
+            this.progressBarColor = Color.Transparent;
+            Initialize();
+        }
+
+        public ProgressToolStripMenuItem() : base()
+        {
+            this.progressBarColor = Color.Transparent;
+            Initialize();
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            e.Graphics.FillRectangle(Brushes.Red, 0, 0, this.Width / 2, this.Height);
+            int paddingH = 4;
+            int paddingV = 3;
+            int leftPadding = 24;
+            
+            e.Graphics.FillRectangle(progressBrush, leftPadding + paddingH, paddingH, (this.Width - leftPadding - paddingH * 2) * ProgressStatus, this.Height - paddingV * 2);
+            e.Graphics.DrawImage(Properties.Resources.bartop, leftPadding + paddingH, paddingH, this.Width - leftPadding - paddingH * 2, this.Height - paddingV * 2);
+            e.Graphics.DrawImage(this.Image, 5, 4, 16, 16);
 
-            base.OnPaint(e);
+            SizeF size = e.Graphics.MeasureString(this.Text, this.Font);
+            e.Graphics.DrawString(this.Text, this.Font, Brushes.Black, leftPadding + 10, (this.Height - size.Height) * 0.5f);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            progressBrush.Dispose();
+            base.Dispose(disposing);
         }
     }
 

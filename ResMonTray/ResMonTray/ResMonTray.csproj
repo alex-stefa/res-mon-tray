@@ -97,6 +97,7 @@
   <ItemGroup />
   <ItemGroup>
     <Content Include="icon.ico" />
+    <None Include="Resources\bartop.png" />
     <None Include="Resources\background.png" />
     <None Include="Resources\quit.ico" />
     <None Include="Resources\Info.ico" />
