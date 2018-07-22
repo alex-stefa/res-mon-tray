@@ -12,4 +12,4 @@ Monitors CPU & memory (RAM and page file) activity through two notification tray
 ![screenshot2](screen2.png)
 
 ---
-exported from code.google.com/p/res-mon-tray
+exported from https://code.google.com/archive/p/res-mon-tray/
